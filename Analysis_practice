@@ -1,2 +1,20 @@
 #make a new directory for analysis
 import pandas as pd
+
+
+# ライブラリーをインポートしておく
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os #ディレクトリ操作するやつ
+
+#まずディレクトリの確認
+os.listdir("/kaggle/input/datasets/takeshiraishi/sleep-hobit")
+
+# 睡眠と習慣サンプルデータを読み込む
+df = pd.read_excel("/kaggle/input/datasets/takeshiraishi/sleep-hobit/sleep_data_expanded.xlsx")
+print(df.head())
+# まず単純にプロットしてみる
+sns.scatterplot(x="sleep_hours", y="stress_level", data=df)
+plt.show()
+
