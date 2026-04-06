@@ -1,0 +1,91 @@
+# =========================
+# ① ライブラリ読み込み
+# =========================
+
+import pandas as pd  # データ操作用ライブラリ
+
+# =========================
+# ② データ読み込み
+# =========================
+
+# 学習用データ（答えあり）
+train = pd.read_csv("/kaggle/input/titanic/train.csv")
+
+# 予測用データ（答えなし）
+test = pd.read_csv("/kaggle/input/titanic/test.csv")
+
+# =========================
+# ③ 前処理（データを使える形にする）
+# =========================
+
+# Age（年齢）には欠損があるので中央値で埋める
+# → 平均より外れ値の影響を受けにくい
+train["Age"] = train["Age"].fillna(train["Age"].median())
+test["Age"] = test["Age"].fillna(test["Age"].median())
+
+# Fare（運賃）はtestデータに欠損があるので埋める
+test["Fare"] = test["Fare"].fillna(test["Fare"].median())
+
+# Sex（性別）は文字列なので数値に変換
+# → モデルは数値しか扱えない
+# male → 0, female → 1 に変換
+train["Sex"] = train["Sex"].map({"male": 0, "female": 1})
+test["Sex"] = test["Sex"].map({"male": 0, "female": 1})
+
+# =========================
+# ④ 特徴量選択（どのデータを使うか決める）
+# =========================
+
+# モデルに入力するカラムを選択
+features = ["Pclass", "Sex", "Age", "Fare"]
+
+# X：説明変数（入力データ）
+X = train[features]
+
+# y：目的変数（予測したい値）
+y = train["Survived"]
+
+# テストデータ側も同じ特徴量を使う
+X_test = test[features]
+
+# =========================
+# ⑤ モデル作成
+# =========================
+
+from sklearn.ensemble import RandomForestClassifier
+
+# ランダムフォレストモデルを作成
+# random_state=0 → 毎回同じ結果になるように固定
+model = RandomForestClassifier(random_state=0)
+
+# モデルに学習させる（Xとyの関係を覚える）
+model.fit(X, y)
+
+# =========================
+# ⑥ 予測
+# =========================
+
+# 学習したモデルを使ってテストデータの生存を予測
+pred = model.predict(X_test)
+
+# =========================
+# ⑦ 提出ファイル作成
+# =========================
+
+# Kaggle提出用の形式にする
+# PassengerId → 乗客ID
+# Survived → 予測結果
+submission = pd.DataFrame({
+    "PassengerId": test["PassengerId"],
+    "Survived": pred
+})
+
+# =========================
+# ⑧ CSV出力
+# =========================
+
+# index=False → 左端の番号（インデックス）を保存しない
+submission.to_csv("submission.csv", index=False)
+
+# 完了メッセージ
+print("提出ファイル作成完了！")
